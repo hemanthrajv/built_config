@@ -8,11 +8,7 @@ Created from templates made available by Stagehand under a BSD-style
 A simple usage example:
 
 ```dart
-import 'package:remote_config_data/built_config.dart';
 
-main() {
-  var awesome = new Awesome();
-}
 ```
 
 ## Features and bugs
