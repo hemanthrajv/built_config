@@ -1,11 +1,10 @@
-A library for Dart developers.
+# Built Config Generator
 
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+Generator for `built_config` package
 
 ## Usage
 
-Add built_config_generator to the `dev_dependencies` in your `pubspec.yaml`
+Add `built_config_generator` to the `dev_dependencies` in your `pubspec.yaml`
 
 ```
 pub run build_runner build
