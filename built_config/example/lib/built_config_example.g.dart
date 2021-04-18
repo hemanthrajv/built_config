@@ -48,7 +48,7 @@ class _$ProdConfigValues extends ProdConfigValues {
 }
 
 /*
-
+BuiltConfigOptions -> true
 */
 
 class _$DefaultConfigValues extends DefaultConfigValues {
@@ -93,5 +93,5 @@ class _$DefaultConfigValues extends DefaultConfigValues {
 }
 
 /*
-
+BuiltConfigOptions -> true
 */
