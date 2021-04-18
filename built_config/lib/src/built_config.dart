@@ -12,6 +12,16 @@ class BuiltConfigField {
   final String description;
 }
 
+class BuiltConfigOptions {
+  const BuiltConfigOptions({
+    this.outputJson = false,
+    this.jsonFileName,
+  }) : assert(outputJson != null);
+
+  final bool outputJson;
+  final String jsonFileName;
+}
+
 abstract class BuiltConfig {
   bool getBool(String key);
 

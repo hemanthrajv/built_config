@@ -8,6 +8,7 @@ class Environment {
 }
 
 // override Default Values for you Production Flavor
+@BuiltConfigOptions(outputJson: true, jsonFileName: 'prod')
 abstract class ProdConfigValues extends DefaultConfigValues
     implements BuiltConfig {
   factory ProdConfigValues() = _$ProdConfigValues;
@@ -24,6 +25,7 @@ abstract class ProdConfigValues extends DefaultConfigValues
 }
 
 // DefaultConfigValues
+@BuiltConfigOptions(outputJson: true, jsonFileName: 'default')
 abstract class DefaultConfigValues implements BuiltConfig {
   factory DefaultConfigValues() = _$DefaultConfigValues;
 
@@ -52,8 +54,7 @@ abstract class DefaultConfigValues implements BuiltConfig {
   )
   int get sampleInt;
 
-
-  @BuiltConfigField(defaultValue: 'myString')
+  @BuiltConfigField(defaultValue: 'myString',description: '')
   String get sampleString;
 
   @BuiltConfigField(defaultValue: true)

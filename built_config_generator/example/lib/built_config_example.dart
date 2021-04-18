@@ -24,6 +24,7 @@ abstract class ProdConfigValues extends DefaultConfigValues
 }
 
 // DefaultConfigValues
+@BuiltConfigOptions(outputJson: true, jsonFileName: 'default')
 abstract class DefaultConfigValues implements BuiltConfig {
   factory DefaultConfigValues() = _$DefaultConfigValues;
 
@@ -51,7 +52,6 @@ abstract class DefaultConfigValues implements BuiltConfig {
     wireName: 'myInt',
   )
   int get sampleInt;
-
 
   @BuiltConfigField(defaultValue: 'myString')
   String get sampleString;

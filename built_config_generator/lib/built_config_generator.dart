@@ -4,15 +4,17 @@
 library remote_config_data_generator;
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:built_collection/built_collection.dart';
+import 'package:built_config/built_config.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:recase/recase.dart';
-import 'package:built_config/built_config.dart';
 import 'package:source_gen/source_gen.dart';
 
 class BuiltConfigGenerator extends Generator {
@@ -107,6 +109,12 @@ extension _ElementAnnotationUtils on ElementAnnotation {
     var displayString =
         computeConstantValue().type.getDisplayString(withNullability: false);
     return isConstantEvaluated && displayString == '$BuiltConfigField';
+  }
+
+  bool get isBuiltConfigOptionsAnnotated {
+    var displayString =
+        computeConstantValue().type.getDisplayString(withNullability: false);
+    return isConstantEvaluated && displayString == '$BuiltConfigOptions';
   }
 }
 
@@ -379,6 +387,20 @@ class _RemoteConfigBuilder {
           ..body = Code(
               '''return <String,dynamic>${_jsonBuilder.map((key, value) => MapEntry('\'$key\'', value))};''');
       })));
+
+    for (final a in classElement.metadata) {
+      if (a.isBuiltConfigOptionsAnnotated) {
+        final shouldOutputJson =
+            a.computeConstantValue().getField('outputJson').toBoolValue();
+        if (shouldOutputJson) {
+          final jsonFileName =
+              a.computeConstantValue().getField('jsonFileName').toStringValue();
+          File('built_config/${jsonFileName ?? 'built_config'}.json')
+            ..createSync(recursive: true)
+            ..writeAsString(jsonEncode(_defaultValueJson));
+        }
+      }
+    }
 
     return formatter
         .format(_remoteClass.accept(emitter).toString() + '\n/*\n$output\n*/');
