@@ -82,7 +82,7 @@ extension _ClassUtils on ClassElement {
   // checks for "factory Class()" constructor
   bool get hasDefaultFactoryConstructor =>
       constructors.firstWhere(
-        (element) => element.isFactory && element?.displayName == '',
+        (element) => element.isFactory && element?.name == '',
         orElse: () => null,
       ) !=
       null;
@@ -93,7 +93,7 @@ extension _ClassUtils on ClassElement {
         (element) =>
             !element.isFactory &&
             element.isPrivate &&
-            element.displayName == '_',
+            element.name == '_',
         orElse: () => null,
       ) !=
       null;
