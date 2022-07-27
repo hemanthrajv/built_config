@@ -1,6 +1,6 @@
 name: built_config_generator
 description: Config Generator
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/hemanthrajv/built_config/tree/master/built_config_generator
 
 environment:

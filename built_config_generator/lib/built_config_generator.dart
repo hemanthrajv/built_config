@@ -39,7 +39,7 @@ class BuiltConfigGenerator extends Generator {
     final output = <String>[];
     if (forLibrary) {
       var name = library.element.name;
-      if (name?.isEmpty ?? false) {
+      if (name.isEmpty ?? false) {
         name = library.element.source.uri.pathSegments.last;
       }
       output.add('// Code for "$name"');
@@ -48,10 +48,10 @@ class BuiltConfigGenerator extends Generator {
       for (var classElement in library.allElements.whereType<ClassElement>()) {
         if (isRemoteConfig(classElement)) {
           final e = classElement.allSupertypes.firstWhere(
-            (element) =>
-                element.getDisplayString(withNullability: false) ==
-                '$BuiltConfig',
-            orElse: () => null,
+            (element) {
+              return element.getDisplayString(withNullability: false) ==
+                '$BuiltConfig';
+            },
           );
           for (final a in e.accessors) {
             output.add('// ' + a.displayName);
@@ -80,49 +80,65 @@ extension _InterfaceUtils on InterfaceType {
 
 extension _ClassUtils on ClassElement {
   // checks for "factory Class()" constructor
-  bool get hasDefaultFactoryConstructor =>
+  bool get hasDefaultFactoryConstructor {
+    try {
       constructors.firstWhere(
-        (element) => element.isFactory && element?.name == '',
-        orElse: () => null,
-      ) !=
-      null;
+        (element) => element.isFactory && element.name == '',
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   // checks for "Class._()" constructos
-  bool get hasDefaultPrivateConstructor =>
+  bool get hasDefaultPrivateConstructor {
+    try {
       constructors.firstWhere(
         (element) =>
-            !element.isFactory &&
-            element.isPrivate &&
-            element.name == '_',
-        orElse: () => null,
-      ) !=
-      null;
-
-  InterfaceType get remoteConfigInterface => interfaces.firstWhere(
-        (e) => e.isRemoteConfig,
-        orElse: () => null,
+            !element.isFactory && element.isPrivate && element.name == '_',
       );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  InterfaceType? get remoteConfigInterface {
+    try {
+      return interfaces.firstWhere(
+        (e) => e.isRemoteConfig,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 extension _ElementAnnotationUtils on ElementAnnotation {
   bool get isBuiltConfigFieldAnnotated {
     var displayString =
-        computeConstantValue().type.getDisplayString(withNullability: false);
+        computeConstantValue()?.type?.getDisplayString(withNullability: false);
     return isConstantEvaluated && displayString == '$BuiltConfigField';
   }
 
   bool get isBuiltConfigOptionsAnnotated {
     var displayString =
-        computeConstantValue().type.getDisplayString(withNullability: false);
+        computeConstantValue()?.type?.getDisplayString(withNullability: false);
     return isConstantEvaluated && displayString == '$BuiltConfigOptions';
   }
 }
 
 extension _PropertyAccessorElementUtils on PropertyAccessorElement {
-  ElementAnnotation get BuiltConfigFieldAnnotation => metadata.firstWhere(
+  ElementAnnotation? get BuiltConfigFieldAnnotation {
+    try {
+      return metadata.firstWhere(
         (e) => e.isBuiltConfigFieldAnnotated,
-        orElse: () => null,
       );
+    } catch (e) {
+      return null;
+    }
+  }
 }
 
 class _RemoteConfigBuilder {
@@ -188,7 +204,7 @@ class _RemoteConfigBuilder {
     });
   }
 
-  Method _buildMethod(
+  Method? _buildMethod(
     PropertyAccessorElement accessor,
     Map<String, String> jsonBuilder,
     Map<String, dynamic> defaultJsonBuilder,
@@ -226,14 +242,14 @@ class _RemoteConfigBuilder {
 
     // get wireName
     final wireName =
-        annotation.computeConstantValue().getField('wireName').toStringValue();
+        annotation.computeConstantValue()?.getField('wireName')?.toStringValue();
 
     // get default value
     final defaultValueObj =
-        annotation.computeConstantValue().getField('defaultValue');
+        annotation.computeConstantValue()?.getField('defaultValue');
 
     // make sure default value type and return type are same
-    if (defaultValueObj.type.getDisplayString(withNullability: false) !=
+    if (defaultValueObj?.type?.getDisplayString(withNullability: false) !=
         accessor.returnType.getDisplayString(withNullability: false)) {
       throw InvalidGenerationSourceError(
         'The type of "defaultValue" in $BuiltConfigField is not same as the Return type of the getter',
@@ -243,14 +259,14 @@ class _RemoteConfigBuilder {
     }
 
     // get default value
-    var defaultValue = _getValueForDartType(defaultValueObj, accessor);
+    var defaultValue = _getValueForDartType(defaultValueObj!, accessor);
 
     // get all values
     final allValues = annotation
         .computeConstantValue()
-        .getField('allValues')
-        .toListValue()
-        .map((e) {
+        ?.getField('allValues')
+        ?.toListValue()
+        ?.map((e) {
       var valueForDartType = _getValueForDartType(e, accessor);
       // make sure default value type and list elements type are same
       if (valueForDartType.runtimeType != defaultValue.runtimeType) {
@@ -265,8 +281,8 @@ class _RemoteConfigBuilder {
     }).toList();
 
     // make sure default value is one of the all values
-    if (allValues.isNotEmpty &&
-        !allValues.contains(defaultValue) &&
+    if (allValues!.isNotEmpty &&
+        !allValues!.contains(defaultValue) &&
         defaultValue != null) {
       throw InvalidGenerationSourceError(
         'The default value is not in accepted values',
@@ -285,7 +301,7 @@ class _RemoteConfigBuilder {
         ..name = accessor.name
         ..type = MethodType.getter
         ..returns = Reference(
-            defaultValueObj.type.getDisplayString(withNullability: false))
+            defaultValueObj.type?.getDisplayString(withNullability: false))
         ..annotations = ListBuilder([CodeExpression(Code('override'))])
         ..lambda = true
         ..body = Code(
@@ -301,13 +317,13 @@ class _RemoteConfigBuilder {
     var defaultValue;
     if (defaultValueObj.isNull) {
       defaultValue = null;
-    } else if (defaultValueObj.type.isDartCoreString) {
+    } else if (defaultValueObj.type!.isDartCoreString) {
       defaultValue = defaultValueObj.toStringValue();
-    } else if (defaultValueObj.type.isDartCoreBool) {
+    } else if (defaultValueObj.type!.isDartCoreBool) {
       defaultValue = defaultValueObj.toBoolValue();
-    } else if (defaultValueObj.type.isDartCoreInt) {
+    } else if (defaultValueObj.type!.isDartCoreInt) {
       defaultValue = defaultValueObj.toIntValue();
-    } else if (defaultValueObj.type.isDartCoreDouble) {
+    } else if (defaultValueObj.type!.isDartCoreDouble) {
       defaultValue = defaultValueObj.toDoubleValue();
     }
     // else if (defaultValueObj.type.isDartCoreList) {
@@ -317,7 +333,7 @@ class _RemoteConfigBuilder {
     // }
     else {
       throw InvalidGenerationSourceError(
-        'Unaccepted return value type ${defaultValueObj.type.getDisplayString(withNullability: true)}',
+        'Unaccepted return value type ${defaultValueObj.type?.getDisplayString(withNullability: true)}',
         todo: '',
         element: accessor,
       );
@@ -329,20 +345,20 @@ class _RemoteConfigBuilder {
     var _remoteClass = buildClass(classElement);
 
     // check if super type is remote configuration
-    final e = classElement.supertype.element.remoteConfigInterface;
+    final e = classElement.supertype?.element.remoteConfigInterface;
 
     final _jsonBuilder = <String, String>{};
     final _defaultValueJson = <String, dynamic>{};
 
-    var _accessors = classElement.accessors?.map((e) => e.name)?.toSet();
+    var _accessors = classElement.accessors.map((e) => e.name).toSet();
 
     // get all accessors
     // if super type is remote configuration, copy its accessors;
     var allAccessors = [
       ...classElement.accessors,
       if (e != null)
-        ...?(classElement.supertype.element?.accessors
-            ?.where((element) => !_accessors.contains(element.name))),
+        ...?(classElement.supertype?.element.accessors
+            .where((element) => !_accessors.contains(element.name))),
     ];
 
     for (final accessor in allAccessors) {
@@ -391,10 +407,10 @@ class _RemoteConfigBuilder {
     for (final a in classElement.metadata) {
       if (a.isBuiltConfigOptionsAnnotated) {
         final shouldOutputJson =
-            a.computeConstantValue().getField('outputJson').toBoolValue();
+            a.computeConstantValue()?.getField('outputJson')?.toBoolValue() ?? false;
         if (shouldOutputJson) {
           final jsonFileName =
-              a.computeConstantValue().getField('jsonFileName').toStringValue();
+              a.computeConstantValue()?.getField('jsonFileName')?.toStringValue();
           File('built_config/${jsonFileName ?? 'built_config'}.json')
             ..createSync(recursive: true)
             ..writeAsString(jsonEncode(_defaultValueJson));
