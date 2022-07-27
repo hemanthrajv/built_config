@@ -1,3 +1,7 @@
+## 0.0.4
+
+* Update to NNBD
+
 ## 0.0.3
 
 * Update dependencies
