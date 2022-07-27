@@ -1,3 +1,7 @@
+## 0.0.3
+
+* Update version
+
 ## 0.0.2
 
 - Added `BuiltConfigOptions` helps to generate the json file of config
