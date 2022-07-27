@@ -35,16 +35,16 @@ abstract class DefaultConfigValues implements BuiltConfig {
   Future<void> dispose() async {}
 
   @override
-  bool getBool(String key) => null;
+  bool? getBool(String key) => null;
 
   @override
-  double getDouble(String key) => null;
+  double? getDouble(String key) => null;
 
   @override
-  int getInt(String key) => null;
+  int? getInt(String key) => null;
 
   @override
-  String getString(String key) => null;
+  String? getString(String key) => null;
 
   @BuiltConfigField(
     defaultValue: 1,
